@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HACCP Dokumentations-Tool - Pflegeheim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #f8fbff 0%, #e8f4f8 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px;
+            background: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #34495e;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        
+        .nav-tab:hover:not(.active) {
+            background: #d5dbdb;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .card h2 {
+            color: #c0392b;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+        
+        .temp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .temp-card {
+            background: linear-gradient(135deg, #e8f8f5 0%, #d1f2eb 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #27ae60;
+        }
+        
+        .temp-card.critical {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-left-color: #f39c12;
+        }
+        
+        .temp-card.danger {
+            background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
+            border-left-color: #e74c3c;
+        }
+        
+        .temp-card h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        
+        .temp-card.critical h3 {
+            color: #f39c12;
+        }
+        
+        .temp-card.danger h3 {
+            color: #e74c3c;
+        }
+        
+        .temp-input-group {
+            display: grid;
+            grid-template-columns: 1fr 100px 80px;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .temp-input-group label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .temp-input-group input {
+            padding: 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .temp-input-group input:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+        
+        .temp-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-critical {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .checklist {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px; /* Added margin for spacing between checklists */
+        }
+        
+        .checklist h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #95a5a6;
+        }
+        
+        .check-item.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .check-item.failed {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .check-item input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+        
+        .check-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        .check-item .timestamp {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #e74c3c;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .summary-box h3 {
+            margin-bottom: 15px;
+        }
+        
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .corrective-action {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .corrective-action h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .protocol-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .protocol-table th {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .protocol-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .protocol-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .protocol-table tr:hover {
+            background-color: #e8f4f8;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #34495e;
+            color: white;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .temp-input-group {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            
+            .temp-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ HACCP Dokumentations-Tool</h1>
+            <p>Hazard Analysis Critical Control Points - Küchenhygiene Pflegeheim</p>
+            <p><strong>Datum:</strong> <span id="currentDate"></span> | <strong>Schicht:</strong> <span id="currentShift"></span></p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('temperatures')">🌡️ Temperaturen</button>
+            <button class="nav-tab" onclick="switchTab('hygiene')">🧼 Hygiene</button>
+            <button class="nav-tab" onclick="switchTab('storage')">📦 Lagerung</button>
+            <button class="nav-tab" onclick="switchTab('cleaning')">🧽 Reinigung</button>
+            <button class="nav-tab" onclick="switchTab('protocols')">📋 Protokolle</button>
+        </div>
+
+        <div id="temperatures" class="tab-content active">
+            <div class="card">
+                <h2>🌡️ Temperaturkontrolle</h2>
+                <div class="temp-grid">
+                    <div class="temp-card">
+                        <h3>❄️ Kühlschrank Allgemein</h3>
+                        <p><strong>Sollwert:</strong> 2°C bis 7°C</p>
+                        <div class="temp-input-group">
+                            <label>Gemessene Temperatur:</label>
+                            <input type="number" id="fridge-temp" step="0.1" placeholder="z.B. 4.2" onchange="checkTemperature('fridge', this.value, 2, 7)">
+                            <div id="fridge-status" class="temp-status">-</div>
+                        </div>
+                        <div class="temp-input-group">
+                            <label>Uhrzeit der Messung:</label>
+                            <input type="time" id="fridge-time">
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="temp-card">
+                        <h3>🧊 Tiefkühlung</h3>
+                        <p><strong>Sollwert:</strong> -18°C oder kälter</p>
+                        <div class="temp-input-group">
+                            <label>Gemessene Temperatur:</label>
+                            <input type="number" id="freezer-temp" step="0.1" placeholder="z.B. -20.5" onchange="checkTemperature('freezer', this.value, -30, -18)">
+                            <div id="freezer-status" class="temp-status">-</div>
+                        </div>
+                        <div class="temp-input-group">
+                            <label>Uhrzeit der Messung:</label>
+                            <input type="time" id="freezer-time">
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="temp-card critical">
+                        <h3>🔥 Warmhaltung</h3>
+                        <p><strong>Sollwert:</strong> mindestens 65°C</p>
+                        <div class="temp-input-group">
+                            <label>Gemessene Temperatur:</label>
+                            <input type="number" id="warmer-temp" step="0.1" placeholder="z.B. 68.0" onchange="checkTemperature('warmer', this.value, 65, 100)">
+                            <div id="warmer-status" class="temp-status">-</div>
+                        </div>
+                        <div class="temp-input-group">
+                            <label>Uhrzeit der Messung:</label>
+                            <input type="time" id="warmer-time">
+                            <div></div>
+                        </div>
+                    </div>
+
+                    <div class="temp-card critical">
+                        <h3>🍲 Speisen beim Servieren</h3>
+                        <p><strong>Sollwert:</strong> mindestens 65°C (warm) / max. 7°C (kalt)</p>
+                        <div class="temp-input-group">
+                            <label>Gemessene Temperatur:</label>
+                            <input type="number" id="serving-temp" step="0.1" placeholder="z.B. 67.5" onchange="checkServingTemperature(this.value)">
+                            <div id="serving-status" class="temp-status">-</div>
+                        </div>
+                        <div class="temp-input-group">
+                            <label>Art der Speise:</label>
+                            <select id="serving-type" onchange="checkServingTemperature(document.getElementById('serving-temp').value)">
+                                <option value="warm">Warme Speise</option>
+                                <option value="cold">Kalte Speise</option>
+                            </select>
+                            <div></div>
+                        </div>
+                        <div class="temp-input-group">
+                            <label>Uhrzeit der Messung:</label>
+                            <input type="time" id="serving-time">
+                            <div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="corrective-action" id="temp-corrective" style="display: none;">
+                    <h4>⚠️ Korrekturmaßnahmen erforderlich</h4>
+                    <div class="input-group">
+                        <label for="temp-action">Durchgeführte Maßnahmen:</label>
+                        <textarea id="temp-action" rows="3" placeholder="z.B. Kühlung überprüft, Service informiert, Speisen nacherhitzt..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="temp-responsible">Verantwortlicher Mitarbeiter:</label>
+                        <input type="text" id="temp-responsible" placeholder="Name des Mitarbeiters">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveTemperatures()">💾 Temperaturen speichern</button>
+            </div>
+        </div>
+
+        <div id="hygiene" class="tab-content">
+            <div class="card">
+                <h2>🧼 Hygienecheckliste</h2>
+                
+                <div class="checklist">
+                    <h3>👥 Personalhygiene</h3>
+                    <div class="check-item">
+                        <input type="checkbox" id="hygiene-hands" onchange="updateCheckItem(this)">
+                        <label for="hygiene-hands">Händewaschen und Desinfektion vor Arbeitsbeginn</label>
+                        <span class="timestamp" id="hygiene-hands-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="hygiene-clothing" onchange="updateCheckItem(this)">
+                        <label for="hygiene-clothing">Saubere Arbeitskleidung und Kopfbedeckung</label>
+                        <span class="timestamp" id="hygiene-clothing-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="hygiene-wounds" onchange="updateCheckItem(this)">
+                        <label for="hygiene-wounds">Wunden und Verletzungen ordnungsgemäß abgedeckt</label>
+                        <span class="timestamp" id="hygiene-wounds-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="hygiene-jewelry" onchange="updateCheckItem(this)">
+                        <label for="hygiene-jewelry">Schmuck abgelegt (außer Ehering)</label>
+                        <span class="timestamp" id="hygiene-jewelry-time"></span>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>🍽️ Lebensmittelhygiene</h3>
+                    <div class="check-item">
+                        <input type="checkbox" id="food-separation" onchange="updateCheckItem(this)">
+                        <label for="food-separation">Rohe und gegarte Lebensmittel getrennt verarbeitet</label>
+                        <span class="timestamp" id="food-separation-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="food-boards" onchange="updateCheckItem(this)">
+                        <label for="food-boards">Verschiedene Schneidebretter für verschiedene Lebensmittel</label>
+                        <span class="timestamp" id="food-boards-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="food-storage" onchange="updateCheckItem(this)">
+                        <label for="food-storage">Lebensmittel ordnungsgemäß gelagert und abgedeckt</label>
+                        <span class="timestamp" id="food-storage-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="food-dates" onchange="updateCheckItem(this)">
+                        <label for="food-dates">Verfallsdaten überprüft und dokumentiert</label>
+                        <span class="timestamp" id="food-dates-time"></span>
+                    </div>
+                </div>
+
+                <div class="checklist">
+                    <h3>🧽 Arbeitsplätze und Geräte</h3>
+                    <div class="check-item">
+                        <input type="checkbox" id="work-surfaces" onchange="updateCheckItem(this)">
+                        <label for="work-surfaces">Arbeitsflächen gereinigt und desinfiziert</label>
+                        <span class="timestamp" id="work-surfaces-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="equipment-clean" onchange="updateCheckItem(this)">
+                        <label for="equipment-clean">Geräte und Maschinen nach Gebrauch gereinigt</label>
+                        <span class="timestamp" id="equipment-clean-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="utensils-clean" onchange="updateCheckItem(this)">
+                        <label for="utensils-clean">Küchenutensilien sauber und in gutem Zustand</label>
+                        <span class="timestamp" id="utensils-clean-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="waste-disposal" onchange="updateCheckItem(this)">
+                        <label for="waste-disposal">Abfallbehälter entleert und gereinigt</label>
+                        <span class="timestamp" id="waste-disposal-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="pest-control" onchange="updateCheckItem(this)">
+                        <label for="pest-control">Keine Anzeichen von Schädlingsbefall</label>
+                        <span class="timestamp" id="pest-control-time"></span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="saveHygieneChecks()">💾 Hygienechecks speichern</button>
+            </div>
+        </div>
+
+        <div id="storage" class="tab-content">
+            <div class="card">
+                <h2>📦 Lagerung</h2>
+                <div class="checklist">
+                    <h3>✔️ Wareneingang und Lagerhaltung</h3>
+                    <div class="input-group">
+                        <label for="delivery-check">Lieferung überprüft (Temperatur, Unversehrtheit):</label>
+                        <input type="checkbox" id="delivery-check" onchange="updateCheckItem(this)">
+                        <span class="timestamp" id="delivery-check-time"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="storage-order">Lebensmittel nach 'First-in, First-out' Prinzip gelagert:</label>
+                        <input type="checkbox" id="storage-order" onchange="updateCheckItem(this)">
+                        <span class="timestamp" id="storage-order-time"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="packaging-intact">Verpackungen intakt und sauber:</label>
+                        <input type="checkbox" id="packaging-intact" onchange="updateCheckItem(this)">
+                        <span class="timestamp" id="packaging-intact-time"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="dry-storage-clean">Trockenlager sauber und ordentlich:</label>
+                        <input type="checkbox" id="dry-storage-clean" onchange="updateCheckItem(this)">
+                        <span class="timestamp" id="dry-storage-clean-time"></span>
+                    </div>
+                    <div class="input-group">
+                        <label for="cross-contamination">Keine Kreuzkontamination zwischen Produkten:</label>
+                        <input type="checkbox" id="cross-contamination" onchange="updateCheckItem(this)">
+                        <span class="timestamp" id="cross-contamination-time"></span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="storage-notes">Bemerkungen zur Lagerung:</label>
+                    <textarea id="storage-notes" rows="3" placeholder="Besondere Vorkommnisse oder Beobachtungen..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveStorageChecks()">💾 Lagerung speichern</button>
+            </div>
+        </div>
+
+        <div id="cleaning" class="tab-content">
+            <div class="card">
+                <h2>🧽 Reinigungsplan</h2>
+                <div class="checklist">
+                    <h3>Tägliche Reinigung</h3>
+                    <div class="check-item">
+                        <input type="checkbox" id="clean-daily-surfaces" onchange="updateCheckItem(this)">
+                        <label for="clean-daily-surfaces">Arbeitsflächen und Spülbecken</label>
+                        <span class="timestamp" id="clean-daily-surfaces-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="clean-daily-floors" onchange="updateCheckItem(this)">
+                        <label for="clean-daily-floors">Fußböden feucht wischen</label>
+                        <span class="timestamp" id="clean-daily-floors-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="clean-daily-waste" onchange="updateCheckItem(this)">
+                        <label for="clean-daily-waste">Mülleimer leeren und reinigen</label>
+                        <span class="timestamp" id="clean-daily-waste-time"></span>
+                    </div>
+                </div>
+                <div class="checklist">
+                    <h3>Wöchentliche Reinigung</h3>
+                    <div class="check-item">
+                        <input type="checkbox" id="clean-weekly-fridge" onchange="updateCheckItem(this)">
+                        <label for="clean-weekly-fridge">Kühlschränke und Tiefkühler innen reinigen</label>
+                        <span class="timestamp" id="clean-weekly-fridge-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="clean-weekly-oven" onchange="updateCheckItem(this)">
+                        <label for="clean-weekly-oven">Öfen und Herde gründlich reinigen</label>
+                        <span class="timestamp" id="clean-weekly-oven-time"></span>
+                    </div>
+                    <div class="check-item">
+                        <input type="checkbox" id="clean-weekly-storage" onchange="updateCheckItem(this)">
+                        <label for="clean-weekly-storage">Trockenlager saugen/wischen</label>
+                        <span class="timestamp" id="clean-weekly-storage-time"></span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="cleaning-notes">Bemerkungen zur Reinigung:</label>
+                    <textarea id="cleaning-notes" rows="3" placeholder="Zusätzliche Reinigungsarbeiten, besondere Auffälligkeiten..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveCleaningChecks()">💾 Reinigung speichern</button>
+            </div>
+        </div>
+
+        <div id="protocols" class="tab-content">
+            <div class="card">
+                <h2>📋 Protokolle und Verlauf</h2>
+                <div class="summary-box">
+                    <h3>Tagesübersicht</h3>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" id="temp-ok-count">0</span>
+                            <span>Temp. OK</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="temp-warning-count">0</span>
+                            <span>Temp. Warnung</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="temp-critical-count">0</span>
+                            <span>Temp. Kritisch</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="hygiene-completed-count">0</span>
+                            <span>Hygiene erledigt</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Verlauf der letzten Einträge</h3>
+                <table class="protocol-table">
+                    <thead>
+                        <tr>
+                            <th>Datum/Uhrzeit</th>
+                            <th>Bereich</th>
+                            <th>Messwert/Check</th>
+                            <th>Status/Ergebnis</th>
+                            <th>Maßnahme</th>
+                            <th>Verantwortlicher</th>
+                        </tr>
+                    </thead>
+                    <tbody id="protocol-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 HACCP Dokumentations-Tool für Pflegeheime</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateDateTime();
+            loadSavedData();
+            // Optional: Set a default shift based on current time
+            const now = new Date();
+            const hour = now.getHours();
+            let shift = '';
+            if (hour >= 6 && hour < 14) {
+                shift = 'Frühschicht';
+            } else if (hour >= 14 && hour < 22) {
+                shift = 'Spätschicht';
+            } else {
+                shift = 'Nachtschicht';
+            }
+            document.getElementById('currentShift').textContent = shift;
+        });
+
+        function updateDateTime() {
+            const now = new Date();
+            const optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
+            const optionsTime = { hour: '2-digit', minute: '2-digit' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('de-DE', optionsDate);
+        }
+
+        let tempReadings = []; // To store temperature data
+        let hygieneChecks = {}; // To store hygiene checklist data
+        let storageChecks = {}; // To store storage checklist data
+        let cleaningChecks = {}; // To store cleaning checklist data
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.nav-tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function checkTemperature(idPrefix, value, min, max) {
+            const temp = parseFloat(value);
+            const statusElement = document.getElementById(`${idPrefix}-status`);
+            const tempCard = statusElement.closest('.temp-card');
+            const correctiveActionDiv = document.getElementById('temp-corrective');
+            let needsCorrection = false;
+
+            statusElement.className = 'temp-status'; // Reset classes
+            tempCard.className = tempCard.className.replace(/ (critical|danger)/g, ''); // Reset card color classes
+
+            if (isNaN(temp)) {
+                statusElement.textContent = '-';
+                return;
+            }
+
+            if (idPrefix === 'warmer' || idPrefix === 'serving') { // Warm holding/serving
+                if (temp >= min && temp <= max) {
+                    statusElement.textContent = 'OK';
+                    statusElement.classList.add('status-ok');
+                } else if (temp < min) {
+                    statusElement.textContent = 'Kritisch!';
+                    statusElement.classList.add('status-critical');
+                    tempCard.classList.add('danger');
+                    needsCorrection = true;
+                } else { // Should not happen with typical temp ranges for warmer
+                     statusElement.textContent = 'Zu hoch!';
+                     statusElement.classList.add('status-warning');
+                     tempCard.classList.add('critical');
+                     needsCorrection = true;
+                }
+            } else if (idPrefix === 'freezer') { // Freezer
+                if (temp <= max) { // Max is -18, so anything less is good
+                    statusElement.textContent = 'OK';
+                    statusElement.classList.add('status-ok');
+                } else if (temp > max && temp <= min) { // Between -18 and -30 for warning/critical
+                    statusElement.textContent = 'Warnung!';
+                    statusElement.classList.add('status-warning');
+                    tempCard.classList.add('critical');
+                    needsCorrection = true;
+                } else if (temp > min) { // Warmer than -30, potentially danger zone if above -18
+                    statusElement.textContent = 'Kritisch!';
+                    statusElement.classList.add('status-critical');
+                    tempCard.classList.add('danger');
+                    needsCorrection = true;
+                }
+            } else { // Fridge (standard min/max)
+                if (temp >= min && temp <= max) {
+                    statusElement.textContent = 'OK';
+                    statusElement.classList.add('status-ok');
+                } else if (temp < min || temp > max) {
+                    statusElement.textContent = 'Kritisch!';
+                    statusElement.classList.add('status-critical');
+                    tempCard.classList.add('danger');
+                    needsCorrection = true;
+                }
+            }
+            
+            // Show or hide corrective action div based on all critical temperatures
+            const currentStatuses = ['fridge', 'freezer', 'warmer'].map(id => document.getElementById(`${id}-status`).classList.contains('status-critical') || document.getElementById(`${id}-status`).classList.contains('status-warning'));
+            const servingStatusCritical = document.getElementById('serving-status').classList.contains('status-critical') || document.getElementById('serving-status').classList.contains('status-warning');
+
+            if (currentStatuses.some(s => s) || servingStatusCritical) {
+                correctiveActionDiv.style.display = 'block';
+            } else {
+                correctiveActionDiv.style.display = 'none';
+            }
+        }
+
+        function checkServingTemperature(value) {
+            const temp = parseFloat(value);
+            const type = document.getElementById('serving-type').value;
+            const statusElement = document.getElementById('serving-status');
+            const tempCard = statusElement.closest('.temp-card');
+            const correctiveActionDiv = document.getElementById('temp-corrective');
+            let needsCorrection = false;
+
+            statusElement.className = 'temp-status'; // Reset classes
+            tempCard.className = tempCard.className.replace(/ (critical|danger)/g, ''); // Reset card color classes
+
+            if (isNaN(temp)) {
+                statusElement.textContent = '-';
+                return;
+            }
+
+            if (type === 'warm') {
+                if (temp >= 65) {
+                    statusElement.textContent = 'OK';
+                    statusElement.classList.add('status-ok');
+                } else {
+                    statusElement.textContent = 'Kritisch! (<65°C)';
+                    statusElement.classList.add('status-critical');
+                    tempCard.classList.add('danger');
+                    needsCorrection = true;
+                }
+            } else if (type === 'cold') {
+                if (temp <= 7) {
+                    statusElement.textContent = 'OK';
+                    statusElement.classList.add('status-ok');
+                } else {
+                    statusElement.textContent = 'Kritisch! (>7°C)';
+                    statusElement.classList.add('status-critical');
+                    tempCard.classList.add('danger');
+                    needsCorrection = true;
+                }
+            }
+
+            // Show or hide corrective action div based on all critical temperatures
+            const currentStatuses = ['fridge', 'freezer', 'warmer'].map(id => document.getElementById(`${id}-status`).classList.contains('status-critical') || document.getElementById(`${id}-status`).classList.contains('status-warning'));
+            const servingStatusCritical = document.getElementById('serving-status').classList.contains('status-critical') || document.getElementById('serving-status').classList.contains('status-warning');
+
+            if (currentStatuses.some(s => s) || servingStatusCritical) {
+                correctiveActionDiv.style.display = 'block';
+            } else {
+                correctiveActionDiv.style.display = 'none';
+            }
+        }
+
+
+        function updateCheckItem(checkbox) {
+            const parent = checkbox.closest('.check-item');
+            const timestampSpan = parent.querySelector('.timestamp');
+            
+            if (checkbox.checked) {
+                parent.classList.add('completed');
+                parent.classList.remove('failed');
+                timestampSpan.textContent = `Erledigt um: ${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+            } else {
+                parent.classList.remove('completed');
+                // You might want to add 'failed' class if it's explicitly unchecked after being checked,
+                // or remove it if it was marked failed and then fixed.
+                // For now, we'll just remove 'completed' and clear timestamp.
+                timestampSpan.textContent = '';
+                // If you want to explicitly mark as 'failed' when unchecked, add:
+                // parent.classList.add('failed');
+            }
+        }
+
+        function saveTemperatures() {
+            const date = document.getElementById('currentDate').textContent;
+            const shift = document.getElementById('currentShift').textContent;
+            const data = {
+                date: date,
+                shift: shift,
+                readings: []
+            };
+
+            const tempInputs = [
+                { id: 'fridge', name: 'Kühlschrank Allgemein', min: 2, max: 7 },
+                { id: 'freezer', name: 'Tiefkühlung', min: -30, max: -18 }, // Adjusted min for freezer to better reflect warning range
+                { id: 'warmer', name: 'Warmhaltung', min: 65, max: 100 },
+                { id: 'serving', name: 'Speisen beim Servieren', min: null, max: null } // Handled separately
+            ];
+
+            tempInputs.forEach(item => {
+                const temp = document.getElementById(`${item.id}-temp`).value;
+                const time = document.getElementById(`${item.id}-time`).value;
+                const status = document.getElementById(`${item.id}-status`).textContent;
+                let type = item.id === 'serving' ? document.getElementById('serving-type').value : null;
+
+                if (temp) {
+                    data.readings.push({
+                        name: item.name,
+                        value: parseFloat(temp),
+                        time: time,
+                        status: status,
+                        type: type // 'warm' or 'cold' for serving
+                    });
+                }
+            });
+
+            const action = document.getElementById('temp-action').value;
+            const responsible = document.getElementById('temp-responsible').value;
+
+            if (action && responsible) {
+                data.correctiveAction = { action: action, responsible: responsible };
+            }
+
+            tempReadings.push(data);
+            localStorage.setItem('haccpTempReadings', JSON.stringify(tempReadings));
+            alert('Temperaturen erfolgreich gespeichert!');
+            updateProtocolTable();
+            resetTemperatureForm();
+        }
+
+        function resetTemperatureForm() {
+            document.getElementById('fridge-temp').value = '';
+            document.getElementById('freezer-temp').value = '';
+            document.getElementById('warmer-temp').value = '';
+            document.getElementById('serving-temp').value = '';
+
+            document.getElementById('fridge-time').value = '';
+            document.getElementById('freezer-time').value = '';
+            document.getElementById('warmer-time').value = '';
+            document.getElementById('serving-time').value = '';
+
+            document.getElementById('fridge-status').textContent = '-';
+            document.getElementById('freezer-status').textContent = '-';
+            document.getElementById('warmer-status').textContent = '-';
+            document.getElementById('serving-status').textContent = '-';
+
+            document.getElementById('fridge-status').className = 'temp-status';
+            document.getElementById('freezer-status').className = 'temp-status';
+            document.getElementById('warmer-status').className = 'temp-status';
+            document.getElementById('serving-status').className = 'temp-status';
+
+            document.getElementById('fridge-status').closest('.temp-card').className = 'temp-card';
+            document.getElementById('freezer-status').closest('.temp-card').className = 'temp-card';
+            document.getElementById('warmer-status').closest('.temp-card').className = 'temp-card critical'; // Warmhaltung is always critical by default styling
+            document.getElementById('serving-status').closest('.temp-card').className = 'temp-card critical'; // Speisen beim Servieren is always critical by default styling
+
+
+            document.getElementById('temp-corrective').style.display = 'none';
+            document.getElementById('temp-action').value = '';
+            document.getElementById('temp-responsible').value = '';
+        }
+
+        function saveHygieneChecks() {
+            const date = document.getElementById('currentDate').textContent;
+            const shift = document.getElementById('currentShift').textContent;
+            
+            const checks = {};
+            document.querySelectorAll('#hygiene .check-item input[type="checkbox"]').forEach(checkbox => {
+                const id = checkbox.id;
+                const label = document.querySelector(`label[for="${id}"]`).textContent;
+                const timestamp = document.getElementById(`${id}-time`).textContent;
+                checks[id] = {
+                    label: label,
+                    checked: checkbox.checked,
+                    timestamp: timestamp
+                };
+            });
+
+            hygieneChecks[date + '_' + shift] = checks; // Store per day and shift
+            localStorage.setItem('haccpHygieneChecks', JSON.stringify(hygieneChecks));
+            alert('Hygienechecks erfolgreich gespeichert!');
+            updateProtocolTable();
+        }
+
+        function saveStorageChecks() {
+            const date = document.getElementById('currentDate').textContent;
+            const shift = document.getElementById('currentShift').textContent;
+            
+            const checks = {};
+            document.querySelectorAll('#storage .input-group input[type="checkbox"]').forEach(checkbox => {
+                const id = checkbox.id;
+                const label = document.querySelector(`label[for="${id}"]`).textContent;
+                const timestamp = document.getElementById(`${id}-time`).textContent;
+                checks[id] = {
+                    label: label,
+                    checked: checkbox.checked,
+                    timestamp: timestamp
+                };
+            });
+            checks['notes'] = document.getElementById('storage-notes').value;
+
+            storageChecks[date + '_' + shift] = checks; // Store per day and shift
+            localStorage.setItem('haccpStorageChecks', JSON.stringify(storageChecks));
+            alert('Lagerungschecks erfolgreich gespeichert!');
+            updateProtocolTable();
+        }
+
+        function saveCleaningChecks() {
+            const date = document.getElementById('currentDate').textContent;
+            const shift = document.getElementById('currentShift').textContent;
+            
+            const checks = {};
+            document.querySelectorAll('#cleaning .check-item input[type="checkbox"]').forEach(checkbox => {
+                const id = checkbox.id;
+                const label = document.querySelector(`label[for="${id}"]`).textContent;
+                const timestamp = document.getElementById(`${id}-time`).textContent;
+                checks[id] = {
+                    label: label,
+                    checked: checkbox.checked,
+                    timestamp: timestamp
+                };
+            });
+            checks['notes'] = document.getElementById('cleaning-notes').value;
+
+            cleaningChecks[date + '_' + shift] = checks; // Store per day and shift
+            localStorage.setItem('haccpCleaningChecks', JSON.stringify(cleaningChecks));
+            alert('Reinigungschecks erfolgreich gespeichert!');
+            updateProtocolTable();
+        }
+
+        function loadSavedData() {
+            const savedTempReadings = localStorage.getItem('haccpTempReadings');
+            if (savedTempReadings) {
+                tempReadings = JSON.parse(savedTempReadings);
+            }
+
+            const savedHygieneChecks = localStorage.getItem('haccpHygieneChecks');
+            if (savedHygieneChecks) {
+                hygieneChecks = JSON.parse(savedHygieneChecks);
+                // Load current day's hygiene checks into the form
+                const date = document.getElementById('currentDate').textContent;
+                const shift = document.getElementById('currentShift').textContent;
+                const currentDayHygiene = hygieneChecks[date + '_' + shift];
+                if (currentDayHygiene) {
+                    for (const id in currentDayHygiene) {
+                        const checkbox = document.getElementById(id);
+                        if (checkbox) {
+                            checkbox.checked = currentDayHygiene[id].checked;
+                            updateCheckItem(checkbox); // Update styling and timestamp
+                        }
+                    }
+                }
+            }
+
+            const savedStorageChecks = localStorage.getItem('haccpStorageChecks');
+            if (savedStorageChecks) {
+                storageChecks = JSON.parse(savedStorageChecks);
+                const date = document.getElementById('currentDate').textContent;
+                const shift = document.getElementById('currentShift').textContent;
+                const currentDayStorage = storageChecks[date + '_' + shift];
+                if (currentDayStorage) {
+                    for (const id in currentDayStorage) {
+                        if (id === 'notes') {
+                            document.getElementById('storage-notes').value = currentDayStorage[id];
+                        } else {
+                            const checkbox = document.getElementById(id);
+                            if (checkbox) {
+                                checkbox.checked = currentDayStorage[id].checked;
+                                updateCheckItem(checkbox);
+                            }
+                        }
+                    }
+                }
+            }
+
+            const savedCleaningChecks = localStorage.getItem('haccpCleaningChecks');
+            if (savedCleaningChecks) {
+                cleaningChecks = JSON.parse(savedCleaningChecks);
+                const date = document.getElementById('currentDate').textContent;
+                const shift = document.getElementById('currentShift').textContent;
+                const currentDayCleaning = cleaningChecks[date + '_' + shift];
+                if (currentDayCleaning) {
+                    for (const id in currentDayCleaning) {
+                        if (id === 'notes') {
+                            document.getElementById('cleaning-notes').value = currentDayCleaning[id];
+                        } else {
+                            const checkbox = document.getElementById(id);
+                            if (checkbox) {
+                                checkbox.checked = currentDayCleaning[id].checked;
+                                updateCheckItem(checkbox);
+                            }
+                        }
+                    }
+                }
+            }
+            updateProtocolTable();
+        }
+
+        function updateProtocolTable() {
+            const protocolBody = document.getElementById('protocol-body');
+            protocolBody.innerHTML = ''; // Clear existing rows
+
+            let tempOk = 0;
+            let tempWarning = 0;
+            let tempCritical = 0;
+            let hygieneCompleted = 0;
+
+            // Process Temperature Readings
+            tempReadings.slice().reverse().forEach(entry => { // Show most recent first
+                const dateShift = `${entry.date} (${entry.shift})`;
+                entry.readings.forEach(reading => {
+                    const row = protocolBody.insertRow();
+                    row.insertCell().textContent = dateShift + ' ' + reading.time;
+                    row.insertCell().textContent = reading.name;
+                    row.insertCell().textContent = `${reading.value}°C` + (reading.type ? ` (${reading.type})` : '');
+                    row.insertCell().textContent = reading.status;
+                    row.insertCell().textContent = entry.correctiveAction ? entry.correctiveAction.action : 'N/A';
+                    row.insertCell().textContent = entry.correctiveAction ? entry.correctiveAction.responsible : 'N/A';
+
+                    if (reading.status === 'OK') {
+                        tempOk++;
+                    } else if (reading.status.includes('Warnung')) {
+                        tempWarning++;
+                    } else if (reading.status.includes('Kritisch')) {
+                        tempCritical++;
+                    }
+                });
+
+                if (entry.correctiveAction) {
+                    const row = protocolBody.insertRow();
+                    row.insertCell().textContent = dateShift;
+                    row.insertCell().textContent = 'Korrekturmaßnahme';
+                    row.insertCell().textContent = '';
+                    row.insertCell().textContent = 'Durchgeführt';
+                    row.insertCell().textContent = entry.correctiveAction.action;
+                    row.insertCell().textContent = entry.correctiveAction.responsible;
+                    row.style.fontStyle = 'italic';
+                    row.style.backgroundColor = '#fefbe1';
+                }
+            });
+
+            // Process Hygiene Checks
+            for (const key in hygieneChecks) {
+                const [date, shift] = key.split('_');
+                const checks = hygieneChecks[key];
+                for (const id in checks) {
+                    if (checks[id].checked) {
+                        hygieneCompleted++;
+                        const row = protocolBody.insertRow();
+                        row.insertCell().textContent = `${date} (${shift}) ${checks[id].timestamp.replace('Erledigt um: ', '')}`;
+                        row.insertCell().textContent = 'Hygiene';
+                        row.insertCell().textContent = checks[id].label;
+                        row.insertCell().textContent = 'Erledigt';
+                        row.insertCell().textContent = 'N/A';
+                        row.insertCell().textContent = 'N/A';
+                    }
+                }
+            }
+
+            // Process Storage Checks
+            for (const key in storageChecks) {
+                const [date, shift] = key.split('_');
+                const checks = storageChecks[key];
+                if (checks['notes']) {
+                    const row = protocolBody.insertRow();
+                    row.insertCell().textContent = `${date} (${shift})`;
+                    row.insertCell().textContent = 'Lagerung';
+                    row.insertCell().textContent = 'Bemerkungen';
+                    row.insertCell().textContent = 'Dokumentiert';
+                    row.insertCell().textContent = checks['notes'];
+                    row.insertCell().textContent = 'N/A';
+                }
+                for (const id in checks) {
+                    if (id !== 'notes' && checks[id].checked) {
+                        const row = protocolBody.insertRow();
+                        row.insertCell().textContent = `${date} (${shift}) ${checks[id].timestamp.replace('Erledigt um: ', '')}`;
+                        row.insertCell().textContent = 'Lagerung';
+                        row.insertCell().textContent = checks[id].label;
+                        row.insertCell().textContent = 'Erledigt';
+                        row.insertCell().textContent = 'N/A';
+                        row.insertCell().textContent = 'N/A';
+                    }
+                }
+            }
+
+            // Process Cleaning Checks
+            for (const key in cleaningChecks) {
+                const [date, shift] = key.split('_');
+                const checks = cleaningChecks[key];
+                if (checks['notes']) {
+                    const row = protocolBody.insertRow();
+                    row.insertCell().textContent = `${date} (${shift})`;
+                    row.insertCell().textContent = 'Reinigung';
+                    row.insertCell().textContent = 'Bemerkungen';
+                    row.insertCell().textContent = 'Dokumentiert';
+                    row.insertCell().textContent = checks['notes'];
+                    row.insertCell().textContent = 'N/A';
+                }
+                for (const id in checks) {
+                    if (id !== 'notes' && checks[id].checked) {
+                        const row = protocolBody.insertRow();
+                        row.insertCell().textContent = `${date} (${shift}) ${checks[id].timestamp.replace('Erledigt um: ', '')}`;
+                        row.insertCell().textContent = 'Reinigung';
+                        row.insertCell().textContent = checks[id].label;
+                        row.insertCell().textContent = 'Erledigt';
+                        row.insertCell().textContent = 'N/A';
+                        row.insertCell().textContent = 'N/A';
+                    }
+                }
+            }
+
+
+            // Update Summary Stats
+            document.getElementById('temp-ok-count').textContent = tempOk;
+            document.getElementById('temp-warning-count').textContent = tempWarning;
+            document.getElementById('temp-critical-count').textContent = tempCritical;
+            document.getElementById('hygiene-completed-count').textContent = hygieneCompleted;
+        }
+
+    </script>
+</body>
+</html>
